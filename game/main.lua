@@ -1,6 +1,10 @@
 
 function love.load()
-    
+    music = {}
+    music.main = love.audio.newSource("sound/new_horizons-enrico_altavilla.mp3", "stream")
+    music.healthsound = love.audio.newSource("sound/mixkit-arcade-retro-changing-tab-206.wav", "static")
+    music.loosehealth = love.audio.newSource("sound/zapsplat_multimedia_game_sound_fail_wrong_error_punchy_dark_84674.mp3","static")
+
     enemy11 = 0
     enemys = {}
     --everyshape--
@@ -50,6 +54,7 @@ function love.load()
 end
 
 function love.draw()
+    
     --lines--
     love.graphics.setColor(1,1,1)
     love.graphics.rectangle("fill",shapes_draw_a_colider.rectangle1.x,shapes_draw_a_colider.rectangle1.y,shapes_draw_a_colider.rectangle1.w,shapes_draw_a_colider.rectangle1.h)
@@ -74,6 +79,8 @@ for i,c in ipairs(enemys) do
 
             if AABB(shapes_draw_a_colider.player.x,shapes_draw_a_colider.player.y,shapes_draw_a_colider.player.w,shapes_draw_a_colider.player.h,c.x,c.y,c.w,c.h) then
                 table.remove(enemys,i)
+                playSound(music.healthsound)
+                
                 c.alive = "false"
                 shapes_draw_a_colider.player.health = shapes_draw_a_colider.player.health + 1  
             end
@@ -91,6 +98,8 @@ for i,c in ipairs(enemys) do
 
     if AABB(shapes_draw_a_colider.player.x,shapes_draw_a_colider.player.y,shapes_draw_a_colider.player.w,shapes_draw_a_colider.player.h,c.x,c.y,c.w,c.h) then
         shapes_draw_a_colider.player.health = shapes_draw_a_colider.player.health - 1
+        
+        playSound(music.loosehealth)
         table.remove(enemys,i)
         c.alive = "false"
     end
@@ -114,9 +123,18 @@ love.graphics.setColor(0.3,1,0.1,0.9)
 
 local font = love.graphics.setNewFont("Sono-Regular.ttf", 50)
 love.graphics.print(shapes_draw_a_colider.player.health,windowwidth/2,10)
+
+
+
+
 end
 
 function love.update(dt)
+
+    if not music.main:isPlaying( ) then
+		love.audio.play( music.main )
+	end
+
     --player x movement--
         if love.keyboard.isDown("a") or love.keyboard.isDown("left") then
             shapes_draw_a_colider.player.x = shapes_draw_a_colider.player.x - 8
@@ -157,8 +175,8 @@ function love.update(dt)
     if shapes_draw_a_colider.player.health < 1 then
         love.event.quit()
     end
-
-
+ 
+ 
 
 end
 
@@ -167,11 +185,15 @@ function love.keypressed(key, scancode, isrepeat)
        move = move - 1
     end
 
+    if key == "space" then
+        shake()
+    end
+
     if key == "s" or key == "down" then
         move = move + 1
      end
 
-     if key == "p" or key == "space" then
+     if key == "p"  then
         
         create_enemy(1)
      end
@@ -207,6 +229,27 @@ function love.keypressed(key, scancode, isrepeat)
            y1 < y2 + h2 and
            y1 + h1 > y2
 end
+
+function DrawCoolThing()
+    love.graphics.push("all") -- save all love.graphics state so any changes can be restored
+
+    love.graphics.setColor(0, 0, 1)
+    love.graphics.setBlendMode("subtract")
+
+    love.graphics.circle("fill", 400, 300, 80)
+
+    love.graphics.pop() -- restore the saved love.graphics state
+end
+
+function playSound(source)
+    local s = source:clone()
+    table.insert(music, s)
+    s:play()
+   end
+   
+   -- in some func or whatever
+   
+   -- remove at some point if you do want them stored in sounds...
 
 
  
